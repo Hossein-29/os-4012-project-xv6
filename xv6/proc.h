@@ -50,6 +50,7 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
   uint cpu_used;               // CPU used in miliseconds 
+  uint mem_used;               // Memory used in bytes
 };
 
 // Process memory is laid out contiguously, low addresses first:

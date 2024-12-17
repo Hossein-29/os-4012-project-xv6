@@ -92,6 +92,7 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
   p->cpu_used = 0;
+  p->mem_used = 0;
 
   release(&ptable.lock);
 

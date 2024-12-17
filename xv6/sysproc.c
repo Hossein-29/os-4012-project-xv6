@@ -110,3 +110,19 @@ sys_cpulim(void)
   mem_limit = mem_lim;
   return 0;
 }
+
+int 
+sys_memuse(void){
+  int amount;
+  if(argint(0, &amount) < 0){
+    return -1;
+  }
+
+  struct proc *p = myproc();
+  int new_amount = p->mem_used + amount;
+  if(new_amount < 0 || new_amount > mem_limit){
+    return -1;
+  }
+  p->mem_used += amount;
+  return 0;
+}

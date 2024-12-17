@@ -26,6 +26,11 @@ free(void *ap)
 {
   Header *bp, *p;
 
+  Header *tempap = (Header*) ap;
+  int nbytes=((tempap->s.size-1)*sizeof(Header)+1)-sizeof(Header);
+  printf(1, "free: nbytes -> %d\n", nbytes);
+  memuse(-nbytes);
+
   bp = (Header*)ap - 1;
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
     if(p >= p->s.ptr && (bp > p || bp < p->s.ptr))
@@ -63,6 +68,12 @@ morecore(uint nu)
 void*
 malloc(uint nbytes)
 {
+  if(memuse(nbytes) < 0){
+    printf(1, "malloc: allocation not possible\n");
+    return 0;
+  }
+  printf(1, "malloc: allocation possible\n");
+
   Header *p, *prevp;
   uint nunits;
 
@@ -81,10 +92,15 @@ malloc(uint nbytes)
         p->s.size = nunits;
       }
       freep = prevp;
+      printf(1, "malloc: allocated memory %d\n", p->s.size);
       return (void*)(p + 1);
     }
     if(p == freep)
       if((p = morecore(nunits)) == 0)
+        // we have already allocated nbytes to the process so if at the end we could not allocate that much 
+        // of memory we need to update the mem_used of process
+        printf(1, "allocation failed");
+        memuse(-nbytes);
         return 0;
   }
 }
