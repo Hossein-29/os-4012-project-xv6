@@ -16,7 +16,7 @@ void cpu_intensive_task(void) {
 }
 
 int main(void) {
-    cpulim(200);
+    cpulim(200, 16*1024*1024);
     printf(1, "cpulim is set 200\n");
     uint start_tick = uptime();
     cpu_intensive_task();
@@ -24,7 +24,7 @@ int main(void) {
     uint elapsed_tick = (end_tick - start_tick);
     printf(1, "passed time with 200 cpulim %d\n", elapsed_tick);
 
-    cpulim(400);
+    cpulim(400, 16*1024*1024);
     printf(1, "cpulim is set 400\n");
     start_tick = uptime();
     cpu_intensive_task();
@@ -32,7 +32,7 @@ int main(void) {
     elapsed_tick = (end_tick - start_tick);
     printf(1, "passed time with 400 cpulim %d\n", elapsed_tick);
 
-    cpulim(800);
+    cpulim(800, 16*1024*1024);
     printf(1, "cpulim is set 800\n");
     start_tick = uptime();
     cpu_intensive_task();

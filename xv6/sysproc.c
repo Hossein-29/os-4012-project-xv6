@@ -93,15 +93,20 @@ sys_uptime(void)
 int
 sys_cpulim(void)
 {
-  int new_limit;
-  if(argint(0, &new_limit) < 0){
+  int cpu_lim, mem_lim;
+  if(argint(0, &cpu_lim) < 0 || argint(1, &mem_lim) < 0){
     return -1;
   }
 
-  if(new_limit > 1000){
+  if(cpu_lim > 1000 || cpu_lim < 0){
     return -1;
   }
 
-  cpu_time_limit = new_limit;
+  if(mem_lim < 0){
+    return -1;
+  }
+
+  cpu_time_limit = cpu_lim;
+  mem_limit = mem_lim;
   return 0;
 }

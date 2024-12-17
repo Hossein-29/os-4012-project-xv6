@@ -21,6 +21,7 @@ extern void trapret(void);
 static void wakeup1(void *chan);
 
 uint cpu_time_limit = 500; // in miliseconds
+uint mem_limit = 16*1024*1024; // in bytes
 
 void
 pinit(void)
