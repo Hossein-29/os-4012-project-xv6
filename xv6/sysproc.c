@@ -124,5 +124,6 @@ sys_memuse(void){
     return -1;
   }
   p->mem_used += amount;
+  cprintf("process %d and uasge %d\n", p->pid, p->mem_used);
   return 0;
 }
