@@ -20,6 +20,8 @@ extern void trapret(void);
 
 static void wakeup1(void *chan);
 
+uint cpu_time_limit = 500; // in miliseconds
+
 void
 pinit(void)
 {
@@ -88,6 +90,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->cpu_used = 0;
 
   release(&ptable.lock);
 
@@ -325,20 +328,56 @@ scheduler(void)
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
+  uint last_reset_time = 0;
   
   for(;;){
     // Enable interrupts on this processor.
     sti();
 
-    // Loop over process table looking for process to run.
-    acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
+    // Acquire tick lock only when necessary to reset CPU usage after a period.
+    // acquire(&tickslock);
+    if (ticks - last_reset_time >= 100) {
+        // cprintf("tick reset at tick %d\n", ticks);
+        last_reset_time = ticks;
+        // release(&tickslock);
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
+        // Reset cpu_used for all processes
+        acquire(&ptable.lock); // Lock ptable before accessing process table
+        for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+            p->cpu_used = 0; // Reset CPU usage for all processes
+        }
+        release(&ptable.lock); // Release ptable lock after processing
+    } 
+    // else {
+        // release(&tickslock);
+    // }
+    // cprintf("helllo this is ticks %d\n", ticks);
+
+    // Loop over process table looking for process to run.
+    acquire(&ptable.lock); // Lock ptable before accessing process table
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+      if (p->state != RUNNABLE) {
+        continue;
+      }
+
+      // Skip process if it exceeds the CPU usage limit
+      // cprintf("process %d: cpu_used up to now %d\n", p->pid, p->cpu_used);
+
+      if (p->cpu_used > cpu_time_limit) {
+        // if(ticks % 10 == 0){
+        //   cprintf("process %d: skipped\n", p->pid);
+        // }
+        continue;
+      }
+      // cprintf("process %d: running\n", p->pid);
+      
+      // Track CPU time used for the process during execution
+      // acquire(&tickslock);
+      uint start_tick = ticks;
+      // cprintf("tick at start %d\n", start_tick);
+      // release(&tickslock);
+
+      // Switch to the chosen process
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
@@ -346,11 +385,19 @@ scheduler(void)
       swtch(&(c->scheduler), p->context);
       switchkvm();
 
+      // acquire(&tickslock);
+      uint end_tick = ticks;
+      // cprintf("tick at end %d\n", end_tick);
+      
+      // release(&tickslock);
+
+      // Calculate CPU usage (increment by elapsed ticks)
+      p->cpu_used += (end_tick - start_tick) * 10;
+
       // Process is done running for now.
-      // It should have changed its p->state before coming back.
       c->proc = 0;
     }
-    release(&ptable.lock);
+    release(&ptable.lock); // Release ptable lock when done
 
   }
 }

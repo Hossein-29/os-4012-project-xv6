@@ -89,3 +89,19 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_cpulim(void)
+{
+  int new_limit;
+  if(argint(0, &new_limit) < 0){
+    return -1;
+  }
+
+  if(new_limit > 1000){
+    return -1;
+  }
+
+  cpu_time_limit = new_limit;
+  return 0;
+}
