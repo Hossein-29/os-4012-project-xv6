@@ -127,3 +127,8 @@ sys_memuse(void){
   cprintf("process %d and uasge %d\n", p->pid, p->mem_used);
   return 0;
 }
+int
+sys_memfree(void)
+{
+  return kfreebytes();
+}

@@ -105,6 +105,7 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_cpulim(void);
 extern int sys_memuse(void);
+extern int sys_memfree(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -130,6 +131,7 @@ static int (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_cpulim]  sys_cpulim,
 [SYS_memuse]  sys_memuse,
+[SYS_memfree] sys_memfree,
 };
 
 void

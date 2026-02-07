@@ -22,3 +22,4 @@
 #define SYS_close  21
 #define SYS_cpulim 22
 #define SYS_memuse 23
+#define SYS_memfree 24

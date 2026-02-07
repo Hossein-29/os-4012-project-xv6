@@ -25,6 +25,7 @@ int sleep(int);
 int uptime(void);
 int cpulim(int, int);
 int memuse(int);
+int memfree(void);
 
 // ulib.c
 int stat(const char*, struct stat*);

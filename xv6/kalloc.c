@@ -94,3 +94,19 @@ kalloc(void)
   return (char*)r;
 }
 
+// Return total free physical memory in bytes.
+int
+kfreebytes(void)
+{
+  struct run *r;
+  int pages = 0;
+
+  if(kmem.use_lock)
+    acquire(&kmem.lock);
+  for(r = kmem.freelist; r; r = r->next)
+    pages++;
+  if(kmem.use_lock)
+    release(&kmem.lock);
+
+  return pages * PGSIZE;
+}
